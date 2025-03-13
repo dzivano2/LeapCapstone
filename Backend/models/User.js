@@ -20,7 +20,7 @@ const UserSchema = new Schema({
   userType: {
     type: String,
     enum: ['user', 'admin', 'employee'],
-    default: 'user',
+    required: true,
   },
   tokens: [
     {
