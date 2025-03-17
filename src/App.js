@@ -15,6 +15,7 @@ import { AuthProvider } from './AuthContext';
 import Profile from './components/Users/Profile';
 import WaitingPage from './components/Queue/WaitingPage'
 import VenueProfile from './components/Queue/VenueProfile'
+import MapPage from './components/MapPage';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/venue/:barId" element={<VenueProfile />} />
         <Route path="/bar/:barId/queue" element={<ProtectedRoute element={QueuePage} />} /> {/* New route */}
         <Route path="/profile" element={<ProtectedRoute element={Profile} />} /> 
+        <Route path="/map" element={<MapPage />} />
       </Routes>
     </AuthProvider>
   );

@@ -118,7 +118,8 @@ const VenueProfile = () => {
         {/* Venue Details */}
         <VStack spacing={2} align="stretch">
           <Text fontSize="lg" fontWeight="bold">
-            Location: <Text as="span" fontWeight="normal">{bar.location}</Text>
+            {/* FIX: Use bar.address, not bar.location */}
+            Location: <Text as="span" fontWeight="normal">{bar.address}</Text>
           </Text>
           <Text fontSize="lg" fontWeight="bold">
             Description: <Text as="span" fontWeight="normal">{bar.description || 'No description provided.'}</Text>
@@ -158,4 +159,3 @@ const VenueProfile = () => {
 };
 
 export default VenueProfile;
-
