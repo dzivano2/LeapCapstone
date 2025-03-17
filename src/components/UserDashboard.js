@@ -17,13 +17,12 @@ import axios from 'axios';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import BottomNavBar from '../components/Users/BottomNavBar';
-// import MapComponent from '../components/MapComponent'; // REMOVE: No longer needed here
+
 
 const UserDashboard = () => {
   const [bars, setBars] = useState([]);
   const [filteredBars, setFilteredBars] = useState([]);
   const [search, setSearch] = useState('');
- //  const [showMap, setShowMap] = useState(false); // REMOVE: Map is now on its own page
   const { token } = useAuth();
   const navigate = useNavigate();
 
@@ -50,12 +49,13 @@ const UserDashboard = () => {
     const value = e.target.value.toLowerCase();
     setSearch(value);
 
-    const filtered = bars.filter(
-      (bar) =>
-        bar.name.toLowerCase().includes(value) ||
-        bar.address.toLowerCase().includes(value)
-    );
-
+    // Add defensive checks here:
+    const filtered = bars.filter((bar) => {
+      return (
+        (bar.name && bar.name.toLowerCase().includes(value)) ||
+        (bar.address && bar.address.toLowerCase().includes(value))
+      );
+    });
     setFilteredBars(filtered);
   };
 
@@ -83,13 +83,11 @@ const UserDashboard = () => {
           boxShadow="md"
         />
       </Box>
-
-      {/* Button to Navigate to Map Page */}
-      {/* <Flex justify="center" mt={2}>
+      <Flex justify="center" mt={2}>
         <Button onClick={() => navigate('/map')} colorScheme="blue">
           View Map
         </Button>
-      </Flex> */}
+      </Flex>
 
       <Flex
         flex="1"
