@@ -29,19 +29,15 @@ if (!fs.existsSync(uploadDir)) {
 // Initialize Express app
 const app = express();
 
-// Middleware to parse JSON requests
-app.use(express.json());
 const corsOptions = {
-  origin: [
-    'https://leap-react-backup-r7qslsh8c-devens-projects-d02199ae.vercel.app', // ✅ Vercel frontend URL
-    'http://localhost:3002', // ✅ Local dev frontend URL
-  ],
+  origin: '*', // ✅ Open to all origins (for testing)
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true, // ✅ Allow credentials (cookies, etc.)
+  credentials: true, 
 };
 
-app.use(cors(corsOptions)); // Apply CORS middleware
+app.use(cors(corsOptions));
+
 
 
 // Enable preflight OPTIONS requests
