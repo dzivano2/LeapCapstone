@@ -15,6 +15,10 @@ L.Icon.Default.mergeOptions({
     iconUrl: require('leaflet/dist/images/marker-icon.png'),
     shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
+const API_URL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:5001'
+  : 'https://leapbackend.onrender.com';
+
 
 // Custom component to control map view
 function MapController({ selectedLocation, userLocation }) {
@@ -80,7 +84,7 @@ const MapPage = () => {
     useEffect(() => {
         const fetchBars = async () => {
             try {
-                const response = await axios.get('http://localhost:5001/api/bars/all', {
+                const response = await axios.get(`${API_URL}/api/bars/all`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
@@ -160,41 +164,41 @@ const MapPage = () => {
 
    
     const createBarMarker = (location) => {
-        const iconColor = selectedMarker === location.id ? 'green' : 'red';
-        const icon = new L.DivIcon({
-            className: 'custom-div-icon bar-icon',
-            html: `<div style='background-color: ${iconColor}; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;'></div>`,
-            iconSize: [15, 15],
-            iconAnchor: [7, 7]
-        });
-    
-        return (
-            <Marker
-                key={location.id}
-                position={[location.latitude, location.longitude]}
-                icon={icon}
-                eventHandlers={{
-                    click: () => handleLocationSelect(location)
-                }}
-            >
-                <Popup>
-                    <div>
-                        {location.name || "Unnamed"} <br /> 
-                        {location.location || 'No address available'}
-                        <br />
-                        {/* ✅ Direct navigation without queue fetching */}
-                        <Button size="sm" colorScheme="blue" onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/venue/${location.id}`);
-                        }}>
-                            View Details
-                        </Button>
-                    </div>
-                </Popup>
-            </Marker>
-        );
-    };
-    
+    const iconColor = selectedMarker === location.id ? 'green' : 'red';
+    const icon = new L.DivIcon({
+        className: 'custom-div-icon bar-icon',
+        html: `<div style='background-color: ${iconColor}; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;'></div>`,
+        iconSize: [15, 15],
+        iconAnchor: [7, 7]
+    });
+
+    return (
+        <Marker
+            key={location.id}
+            position={[location.latitude, location.longitude]}
+            icon={icon}
+            eventHandlers={{
+                click: () => handleLocationSelect(location)
+            }}
+        >
+            <Popup>
+                <div>
+                    {location.name || "Unnamed"} <br /> 
+                    {location.location || 'No address available'}
+                    <br />
+                    {/* ✅ Direct navigation without queue fetching */}
+                    <Button size="sm" colorScheme="blue" onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/venue/${location.id}`);
+                    }}>
+                        View Details
+                    </Button>
+                </div>
+            </Popup>
+        </Marker>
+    );
+};
+
 
     if (loading) {
         return (
