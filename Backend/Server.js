@@ -31,7 +31,12 @@ const app = express();
 
 // Middleware to parse JSON requests
 app.use(express.json());
-const allowedOrigins = ['https://leap-react-backup-r7qslsh8c-devens-projects-d02199ae.vercel.app', 'http://localhost:3002'];
+const allowedOrigins = [
+  'https://leap-react-backup-r7qslsh8c-devens-projects-d02199ae.vercel.app', 
+  /^https:\/\/leap-react-backup-.*-devens-projects-d02199ae\.vercel\.app$/,
+  'http://localhost:3002'
+];
+
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
