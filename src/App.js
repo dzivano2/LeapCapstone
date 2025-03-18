@@ -18,6 +18,7 @@ import VenueProfile from './components/Queue/VenueProfile';
 import Chat from './components/Users/Chat';
 import MapPage from './components/MapPage';
 import SuccessPage from './components/Queue/SuccessPage';
+import CancelPage from './components/Queue/CancelPage';
 
 function App() {
   return (
@@ -33,7 +34,8 @@ function App() {
         <Route path="/bar/:barId/manage-employees" element={<ProtectedRoute element={ManageEmployees} />} />
         <Route path="/bar/:barId/manage-queue" element={<ProtectedRoute element={ManageQueue} />} />
         <Route path="/queue/waiting/:barId" element={<WaitingPage />} />
-        <Route path="/success" element={<SuccessPage />} />
+        <Route path="/success" element={<ProtectedRoute element={SuccessPage} />} />
+        <Route path="/cancel" element={<CancelPage />} />
         <Route path="/venue/:barId" element={<VenueProfile />} />
         <Route path="/bar/:barId/queue" element={<ProtectedRoute element={QueuePage} />} />
         <Route path="/profile" element={<ProtectedRoute element={Profile} />} />
