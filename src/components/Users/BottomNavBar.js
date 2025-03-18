@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
-import { FaHome, FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaUser, FaSignOutAlt, FaComments } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 
@@ -18,9 +18,10 @@ const BottomNavBar = () => {
       color="white"
       borderTop="1px solid gray"
       zIndex={1000}
-      height="70px" // Explicit height for consistent padding
+      height="70px"
     >
       <Flex justify="space-around" align="center" height="100%">
+        {/* Home */}
         <Flex direction="column" align="center" onClick={() => navigate('/user-dashboard')}>
           <IconButton
             aria-label="Home"
@@ -31,6 +32,8 @@ const BottomNavBar = () => {
           />
           <Text fontSize="xs">Home</Text>
         </Flex>
+
+        {/* Profile */}
         <Flex direction="column" align="center" onClick={() => navigate('/profile')}>
           <IconButton
             aria-label="Profile"
@@ -41,6 +44,20 @@ const BottomNavBar = () => {
           />
           <Text fontSize="xs">Profile</Text>
         </Flex>
+
+        {/* Chat Button */}
+        <Flex direction="column" align="center" onClick={() => navigate('/chat')}>
+          <IconButton
+            aria-label="Chat"
+            icon={<FaComments />}
+            variant="ghost"
+            color="white"
+            size="lg"
+          />
+          <Text fontSize="xs">Chat</Text>
+        </Flex>
+
+        {/* Logout */}
         <Flex direction="column" align="center" onClick={() => logout()}>
           <IconButton
             aria-label="Logout"

@@ -12,7 +12,7 @@ const employeeRoutes = require('./routes/employeeRoutes'); // Import the employe
 const userRoutes = require('./routes/userRoutes'); // Import user routes
 const { router: queueRoutes, initializeSocket } = require('./routes/queueRoutes'); // Import queue routes and socket initializer
 const { auth, isAdmin } = require('./middleware/authMiddleware'); // Import auth and isAdmin middleware
-
+const chatRoutes = require('./routes/chat');
 // Create uploads directory if it doesn't exist
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -131,6 +131,9 @@ app.get('/me', auth, async (req, res) => {
 
 // Bar routes
 app.use('/api/bars', barRoutes);
+
+//ChatGPT routes
+app.use('/api', chatRoutes);
 
 // Employee routes
 app.use('/api/employees', employeeRoutes);
