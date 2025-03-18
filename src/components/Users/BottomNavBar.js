@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
-import { FaHome, FaUser, FaSignOutAlt, FaComments } from 'react-icons/fa';
+import { FaHome, FaUser, FaSignOutAlt, FaMapMarkerAlt, FaComments } from 'react-icons/fa'; 
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 
@@ -31,6 +31,18 @@ const BottomNavBar = () => {
             size="lg"
           />
           <Text fontSize="xs">Home</Text>
+        </Flex>
+
+        {/* Map Icon */}
+        <Flex direction="column" align="center" onClick={() => navigate('/map')}>
+          <IconButton
+            aria-label="Map"
+            icon={<FaMapMarkerAlt />} 
+            variant="ghost"
+            color="white"
+            size="lg"
+          />
+          <Text fontSize="xs">Map</Text>
         </Flex>
 
         {/* Profile */}

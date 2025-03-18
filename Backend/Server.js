@@ -56,6 +56,7 @@ app.post(
     }
 
     const { username, email, password, dateOfBirth, userType } = req.body; // Include userType from request payload
+    console.log('Received userType:', userType); // Debugging: Check the value of userType
 
     try {
       // Check if user already exists

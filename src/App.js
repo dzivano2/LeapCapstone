@@ -15,7 +15,8 @@ import { AuthProvider } from './AuthContext';
 import Profile from './components/Users/Profile';
 import WaitingPage from './components/Queue/WaitingPage';
 import VenueProfile from './components/Queue/VenueProfile';
-import Chat from './components/Users/Chat'; // Import Chat
+import Chat from './components/Users/Chat';
+import MapPage from './components/MapPage';
 
 function App() {
   return (
@@ -36,6 +37,8 @@ function App() {
         <Route path="/profile" element={<ProtectedRoute element={Profile} />} />
         {/* Chat Route */}
         <Route path="/chat" element={<ProtectedRoute element={Chat} />} />
+        {/* Map Route */}
+        <Route path="/map" element={<MapPage />} />
       </Routes>
     </AuthProvider>
   );

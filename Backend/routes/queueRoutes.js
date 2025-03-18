@@ -36,12 +36,15 @@ router.get('/status/:barId', auth, async (req, res) => {
     if (!queue) return res.status(404).json({ msg: 'Queue not found' });
 
     // EMPLOYEE ACCESS RESTRICTION
-    if (req.user.userType === 'employee' && req.user.barId.toString() !== req.params.barId) {
+    if ((req.user.userType == 'admin') ){
+
+    }
+    else if ( (req.user.userType === 'employee' && req.user.barId.toString() !== req.params.barId)) {
       return res.status(403).json({ msg: 'Unauthorized to access this queue' });
     }
 
     // REGULAR USER ACCESS — Queue must be open
-    if (req.user.userType !== 'employee' && !queue.isOpen) {
+    if ((req.user.userType != 'admin' && req.user.userType !== 'employee') && !queue.isOpen) {
       return res.status(403).json({ msg: 'Queue is closed' });
     }
 
@@ -96,7 +99,10 @@ router.post('/open/:barId', auth, async (req, res) => {
 
   try {
     // ✅ Prevent access if the bar ID doesn't match the user's assigned bar
-    if (String(req.user.barId) !== String(req.params.barId)) {
+    if ((req.user.userType === 'admin') ){
+
+    }
+    else if ( (String(req.user.barId) !== String(req.params.barId))) {
       return res.status(403).json({ msg: 'Unauthorized to open this queue' });
     }
 

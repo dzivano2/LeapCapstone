@@ -36,6 +36,18 @@ const Signup = () => {
     try {
       // Include isAdmin in the signup payload
       const userType = isAdmin ? 'admin' : 'user'; // Check the checkbox state
+      console.log("usertype check: user is - ",userType)
+
+      const payload = {
+        username,
+        email,
+        password,
+        dateOfBirth,
+        userType, // Ensure this is included in the payload
+      };
+    
+      console.log('Signup Payload:', payload); // Debugging: Check the payload
+
       await signup({
         username,
         email,
@@ -157,7 +169,12 @@ const Signup = () => {
               <Checkbox
                 colorScheme="blue"
                 isChecked={isAdmin}
-                onChange={(e) => setIsAdmin(e.target.checked)}
+                onChange={(e) => 
+                  {
+                    console.log('Checkbox checked:', e.target.checked); // Debugging: Check the checkbox value
+                    setIsAdmin(e.target.checked)
+                  }
+                }
               >
                 Sign up as Admin
               </Checkbox>

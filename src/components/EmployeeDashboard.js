@@ -17,6 +17,7 @@ import axios from 'axios';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FaSignOutAlt } from 'react-icons/fa';
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const EmployeeDashboard = () => {
   const { token, user, logout } = useAuth();
@@ -76,6 +77,7 @@ const EmployeeDashboard = () => {
       });
     }
   };
+
   const handleOpenQueue = async () => {
     try {
       await axios.post(
@@ -103,7 +105,6 @@ const EmployeeDashboard = () => {
       });
     }
   };
-  
 
   const handleCloseQueue = async () => {
     try {
@@ -165,6 +166,27 @@ const EmployeeDashboard = () => {
     }
   };
 
+  const onDragEnd = (result) => {
+    const { destination, source } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const newQueue = Array.from(queue);
+    const [removed] = newQueue.splice(source.index, 1);
+    newQueue.splice(destination.index, 0, removed);
+
+    setQueue(newQueue);
+  };
+
   if (loading) {
     return (
       <Flex justify="center" align="center" height="100vh">
@@ -175,145 +197,156 @@ const EmployeeDashboard = () => {
 
   return (
     <Box minHeight="100vh" bg="gray.100" color="black" px={6} py={8}>
-  {/* Header */}
-  <header style={{
-    backgroundColor: '#1f1f1f', // Dark gray like the Admin Dashboard
-    width: '100vw', // Full width
-    padding: '16px 24px',
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    zIndex: 1000,
-    display: 'flex',
-    justifyContent: 'center', // Center the heading
-    alignItems: 'center',
-  }}>
-    <Heading size="lg" color="white">
-      Employee Dashboard
-    </Heading>
-  </header>
+      {/* Header */}
+      <header style={{
+        backgroundColor: '#1f1f1f', // Dark gray like the Admin Dashboard
+        width: '100vw', // Full width
+        padding: '16px 24px',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        zIndex: 1000,
+        display: 'flex',
+        justifyContent: 'center', // Center the heading
+        alignItems: 'center',
+      }}>
+        <Heading size="lg" color="white">
+          Employee Dashboard
+        </Heading>
+      </header>
 
-  {/* Main Content */}
-  <Flex direction={{ base: 'column', md: 'row' }} gap={6} mt={20}>
-    {/* ✅ Queue Section */}
-    <Box
-      bg="white"
-      p={6}
-      borderRadius="lg"
-      boxShadow="md"
-      flex="1"
-      height="auto"
-      marginTop={-5}
-    >
-      <Heading size="md" mb={4} color="gray.800">
-        Queue Status
-      </Heading>
-      <Text mb={4} fontSize="lg" color="gray.600">
-        {isQueueOpen
-          ? `Queue is Open - ${queueLength} people in queue`
-          : 'Queue is Closed'}
-      </Text>
+      {/* Main Content */}
+      <Flex direction={{ base: 'column', md: 'row' }} gap={6} mt={20}>
+        {/* ✅ Queue Section */}
+        <Box
+          bg="white"
+          p={6}
+          borderRadius="lg"
+          boxShadow="md"
+          flex="1"
+          height="auto"
+          marginTop={-5}
+        >
+          <Heading size="md" mb={4} color="gray.800">
+            Queue Status
+          </Heading>
+          <Text mb={4} fontSize="lg" color="gray.600">
+            {isQueueOpen
+              ? `Queue is Open - ${queueLength} people in queue`
+              : 'Queue is Closed'}
+          </Text>
 
-      {isQueueOpen &&
-        queue.map((user, index) => (
-          <Flex
-            key={user.userId}
-            justify="space-between"
-            bg="gray.50"
-            p={3}
-            borderRadius="md"
-            mb={2}
-            _hover={{ bg: 'gray.100' }}
-          >
-            <Text>{index + 1}. {user.name}</Text>
-            <Button
-              size="sm"
-              colorScheme="red"
-              onClick={() => handleRemoveUser(user.userId)}
-              leftIcon={<DeleteIcon />}
-            >
-              Remove
+          {isQueueOpen && (
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="queue">
+                {(provided) => (
+                  <div {...provided.droppableProps} ref={provided.innerRef}>
+                    {queue.map((user, index) => (
+                      <Draggable key={user.userId} draggableId={user.userId} index={index}>
+                        {(provided) => (
+                          <Flex
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            justify="space-between"
+                            bg="gray.50"
+                            p={3}
+                            borderRadius="md"
+                            mb={2}
+                            _hover={{ bg: 'gray.100' }}
+                          >
+                            <Text>{index + 1}. {user.name}</Text>
+                            <Button
+                              size="sm"
+                              colorScheme="red"
+                              onClick={() => handleRemoveUser(user.userId)}
+                              leftIcon={<DeleteIcon />}
+                            >
+                              Remove
+                            </Button>
+                          </Flex>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          )}
+
+          {isQueueOpen ? (
+            <Button colorScheme="red" mt={4} onClick={handleCloseQueue}>
+              Close Queue
             </Button>
-          </Flex>
-        ))}
-
-{isQueueOpen ? (
-  <Button colorScheme="red" mt={4} onClick={handleCloseQueue}>
-    Close Queue
-  </Button>
-) : (
-  <Button colorScheme="green" mt={4} onClick={handleOpenQueue}>
-    Open Queue
-  </Button>
-)}
-
-      
-    </Box>
-
-    {/* ✅ QR Scanner Section */}
-    <Box
-      bg="white"
-      p={6}
-      borderRadius="lg"
-      boxShadow="md"
-      flex="1"
-      height="auto"
-    >
-      <Heading size="md" mb={4} color="gray.800">
-        QR Scanner
-      </Heading>
-      <Button
-        colorScheme="blue"
-        leftIcon={<ChevronDownIcon />}
-        onClick={() => setIsScannerOpen(!isScannerOpen)}
-      >
-        {isScannerOpen ? 'Close QR Scanner' : 'Open QR Scanner'}
-      </Button>
-
-      {isScannerOpen && (
-        <Box mt={4} borderRadius="md" overflow="hidden" paddingBottom={10}>
-          <QrReader
-            onUpdate={(err, result) => {
-              if (result) handleScan(result);
-            }}
-            constraints={{ facingMode: 'environment' }}
-          />
+          ) : (
+            <Button colorScheme="green" mt={4} onClick={handleOpenQueue}>
+              Open Queue
+            </Button>
+          )}
         </Box>
-      )}
-    </Box>
-  </Flex>
 
-  {/* ✅ Bottom Navigation Bar */}
- {/* Bottom Navigation Bar */}
-<Box
-  position="fixed"
-  bottom={0}
-  left={0}
-  right={0}
-  bg="gray.900"
-  color="white"
-  borderTop="1px solid gray"
-  zIndex={1000}
-  height="70px" // Exact height for consistency
->
-  <Flex justify="center" align="center" height="100%">
-    <Flex direction="column" align="center" onClick={logout} cursor="pointer">
-      <IconButton
-        aria-label="Logout"
-        icon={<FaSignOutAlt />}
-        variant="ghost"
+        {/* ✅ QR Scanner Section */}
+        <Box
+          bg="white"
+          p={6}
+          borderRadius="lg"
+          boxShadow="md"
+          flex="1"
+          height="auto"
+        >
+          <Heading size="md" mb={4} color="gray.800">
+            QR Scanner
+          </Heading>
+          <Button
+            colorScheme="blue"
+            leftIcon={<ChevronDownIcon />}
+            onClick={() => setIsScannerOpen(!isScannerOpen)}
+          >
+            {isScannerOpen ? 'Close QR Scanner' : 'Open QR Scanner'}
+          </Button>
+
+          {isScannerOpen && (
+            <Box mt={4} borderRadius="md" overflow="hidden" paddingBottom={10}>
+              <QrReader
+                onUpdate={(err, result) => {
+                  if (result) handleScan(result);
+                }}
+                constraints={{ facingMode: 'environment' }}
+              />
+            </Box>
+          )}
+        </Box>
+      </Flex>
+
+      {/* ✅ Bottom Navigation Bar */}
+      <Box
+        position="fixed"
+        bottom={0}
+        left={0}
+        right={0}
+        bg="gray.900"
         color="white"
-        size="lg"
-        _hover={{ bg: 'gray.700' }}
-        _active={{ bg: 'gray.800' }}
-      />
-      <Text fontSize="xs">Logout</Text>
-    </Flex>
-  </Flex>
-</Box>
-
-</Box>
-
+        borderTop="1px solid gray"
+        zIndex={1000}
+        height="70px" // Exact height for consistency
+      >
+        <Flex justify="center" align="center" height="100%">
+          <Flex direction="column" align="center" onClick={logout} cursor="pointer">
+            <IconButton
+              aria-label="Logout"
+              icon={<FaSignOutAlt />}
+              variant="ghost"
+              color="white"
+              size="lg"
+              _hover={{ bg: 'gray.700' }}
+              _active={{ bg: 'gray.800' }}
+            />
+            <Text fontSize="xs">Logout</Text>
+          </Flex>
+        </Flex>
+      </Box>
+    </Box>
   );
 };
 

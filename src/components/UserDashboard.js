@@ -1,3 +1,4 @@
+// src/components/Users/UserDashboard.js
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -15,7 +16,8 @@ import {
 import axios from 'axios';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
-import BottomNavBar from '../components/Users/BottomNavBar'; // Import Bottom Navigation Bar
+import BottomNavBar from '../components/Users/BottomNavBar';
+
 
 const UserDashboard = () => {
   const [bars, setBars] = useState([]);
@@ -47,12 +49,13 @@ const UserDashboard = () => {
     const value = e.target.value.toLowerCase();
     setSearch(value);
 
-    const filtered = bars.filter(
-      (bar) =>
-        bar.name.toLowerCase().includes(value) ||
-        bar.location.toLowerCase().includes(value)
-    );
-
+    // Add defensive checks here:
+    const filtered = bars.filter((bar) => {
+      return (
+        (bar.name && bar.name.toLowerCase().includes(value)) ||
+        (bar.address && bar.address.toLowerCase().includes(value))
+      );
+    });
     setFilteredBars(filtered);
   };
 
@@ -62,14 +65,12 @@ const UserDashboard = () => {
 
   return (
     <Box position="relative" minHeight="100vh" display="flex" flexDirection="column" bg="gray.100">
-      {/* Header */}
       <Box bg="gray.900" width="100%" py={4} px={6} display="flex" justifyContent="center">
         <Heading as="h1" size="lg" color="white">
           Explore Venues
         </Heading>
       </Box>
 
-      {/* Search Bar */}
       <Box bg="gray.100" py={4} px={6} display="flex" justifyContent="center">
         <Input
           placeholder="Search venues by name or location"
@@ -82,8 +83,12 @@ const UserDashboard = () => {
           boxShadow="md"
         />
       </Box>
+      <Flex justify="center" mt={2}>
+        <Button onClick={() => navigate('/map')} colorScheme="blue">
+          View Map
+        </Button>
+      </Flex>
 
-      {/* Venue Grid */}
       <Flex
         flex="1"
         direction="column"
@@ -91,7 +96,7 @@ const UserDashboard = () => {
         py={10}
         px={6}
         bg="white"
-        paddingBottom="80px" // Add padding to prevent overlap
+        paddingBottom="80px"
       >
         <VStack spacing={4} w="full" maxW="6xl" align="stretch">
           <Heading as="h2" size="md" color="gray.700" mb={4}>
@@ -124,7 +129,7 @@ const UserDashboard = () => {
                       {bar.name}
                     </Text>
                     <Text fontSize="sm" color="gray.600" mt={1}>
-                      {bar.location}
+                      {bar.address}
                     </Text>
                   </Box>
                 </Flex>
@@ -134,7 +139,6 @@ const UserDashboard = () => {
         </VStack>
       </Flex>
 
-      {/* Footer Navigation */}
       <BottomNavBar />
     </Box>
   );
