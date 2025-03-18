@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-
 import axios from 'axios';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
+const API_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5001'
+    : 'https://leapbackend.onrender.com';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -29,7 +31,7 @@ export const AuthProvider = ({ children }) => {
           return;
         }
 
-        const response = await axios.get('http://localhost:5001/me', {
+        const response = await axios.get(`${API_URL}/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log('User data retrieved:', response.data);
@@ -49,9 +51,15 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, [token]);
 
-  const signup = async ({ username, email, password, dateOfBirth,userType }) => {
+  const signup = async ({ username, email, password, dateOfBirth, userType }) => {
     try {
-      const response = await axios.post('http://localhost:5001/signup', { username, email, password, dateOfBirth,userType });
+      const response = await axios.post(`${API_URL}/signup`, {
+        username,
+        email,
+        password,
+        dateOfBirth,
+        userType,
+      });
       setToken(response.data.token);
       localStorage.setItem('token', response.data.token);
       setUser(response.data.user);
@@ -65,7 +73,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async ({ username, password }) => {
     try {
-      const response = await axios.post('http://localhost:5001/login', { username, password });
+      const response = await axios.post(`${API_URL}/login`, {
+        username,
+        password,
+      });
       setToken(response.data.token);
       localStorage.setItem('token', response.data.token);
       setUser(response.data.user);
@@ -82,7 +93,6 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('token');
     console.log('User logged out');
-   
   };
 
   return (

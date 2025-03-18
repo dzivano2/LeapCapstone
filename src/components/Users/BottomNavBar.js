@@ -1,12 +1,26 @@
 import React from 'react';
-import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
-import { FaHome, FaUser, FaSignOutAlt, FaMapMarkerAlt, FaComments } from 'react-icons/fa'; 
+import {
+  Box,
+  Flex,
+  IconButton,
+  Text,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  Button,
+  useDisclosure,
+} from '@chakra-ui/react';
+import { FaHome, FaUser, FaSignOutAlt, FaMapMarkerAlt, FaComments, FaCog } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 
 const BottomNavBar = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <Box
@@ -37,7 +51,7 @@ const BottomNavBar = () => {
         <Flex direction="column" align="center" onClick={() => navigate('/map')}>
           <IconButton
             aria-label="Map"
-            icon={<FaMapMarkerAlt />} 
+            icon={<FaMapMarkerAlt />}
             variant="ghost"
             color="white"
             size="lg"
@@ -45,17 +59,7 @@ const BottomNavBar = () => {
           <Text fontSize="xs">Map</Text>
         </Flex>
 
-        {/* Profile */}
-        <Flex direction="column" align="center" onClick={() => navigate('/profile')}>
-          <IconButton
-            aria-label="Profile"
-            icon={<FaUser />}
-            variant="ghost"
-            color="white"
-            size="lg"
-          />
-          <Text fontSize="xs">Profile</Text>
-        </Flex>
+   
 
         {/* Chat Button */}
         <Flex direction="column" align="center" onClick={() => navigate('/chat')}>
@@ -69,20 +73,76 @@ const BottomNavBar = () => {
           <Text fontSize="xs">Chat</Text>
         </Flex>
 
-        {/* Logout */}
-        <Flex direction="column" align="center" onClick={() => logout()}>
+        {/* Settings Button */}
+        <Flex direction="column" align="center" onClick={onOpen}>
           <IconButton
-            aria-label="Logout"
-            icon={<FaSignOutAlt />}
+            aria-label="Settings"
+            icon={<FaCog />}
             variant="ghost"
             color="white"
             size="lg"
           />
-          <Text fontSize="xs">Logout</Text>
+          <Text fontSize="xs">Settings</Text>
         </Flex>
       </Flex>
+
+      {/* Settings Popup */}
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <ModalOverlay />
+        <ModalContent
+          bg="gray.800"
+          borderRadius="lg"
+          boxShadow="lg"
+          padding="20px"
+        >
+          <ModalHeader color="white" fontWeight="bold" textAlign="center">
+            Settings
+          </ModalHeader>
+          <ModalCloseButton color="white" />
+          <ModalBody display="flex" flexDirection="column" gap={4}>
+            {/* View Profile Button */}
+            <Button
+              onClick={() => {
+                navigate('/profile');
+                onClose();
+              }}
+              bg="gray.700"
+              color="white"
+              _hover={{ bg: 'gray.600' }}
+              _active={{ bg: 'gray.500' }}
+              borderRadius="full"
+              padding="12px"
+              fontSize="md"
+              fontWeight="medium"
+              transition="0.2s ease"
+            >
+              View Profile
+            </Button>
+
+            {/* Logout Button */}
+            <Button
+              onClick={() => {
+                logout();
+                onClose();
+              }}
+              bg="red.600"
+              color="white"
+              _hover={{ bg: 'red.500' }}
+              _active={{ bg: 'red.400' }}
+              borderRadius="full"
+              padding="12px"
+              fontSize="md"
+              fontWeight="medium"
+              transition="0.2s ease"
+            >
+              Logout
+            </Button>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
 
 export default BottomNavBar;
+
