@@ -33,15 +33,16 @@ const app = express();
 app.use(express.json());
 const corsOptions = {
   origin: [
-    'https://leapcapstone.web.app',  // Firebase frontend
-    'http://localhost:3002',         // Localhost for local development
+    'https://leap-react-backup-r7qslsh8c-devens-projects-d02199ae.vercel.app', // ✅ Vercel frontend URL
+    'http://localhost:3002', // ✅ Local dev frontend URL
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,  // Allow credentials (cookies, etc.)
+  credentials: true, // ✅ Allow credentials (cookies, etc.)
 };
 
-app.use(cors(corsOptions));  // Apply CORS middleware
+app.use(cors(corsOptions)); // Apply CORS middleware
+
 
 // Enable preflight OPTIONS requests
 app.options('*', cors());

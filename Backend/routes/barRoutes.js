@@ -202,6 +202,31 @@ router.get('/:id', auth, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+// Delete a bar by ID
+// Delete a bar by ID
+router.delete('/:id', auth, isAdmin, async (req, res) => {
+  try {
+    const bar = await Bar.findById(req.params.id);
+    if (!bar) {
+      return res.status(404).json({ msg: 'Bar not found' });
+    }
+
+    // Only the creator can delete the bar
+    if (bar.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ msg: 'User not authorized to delete this bar' });
+    }
+
+    // Use deleteOne instead of remove
+    await Bar.deleteOne({ _id: req.params.id });
+
+    res.json({ msg: 'Bar removed successfully' });
+  } catch (err) {
+    console.log('Server error while deleting bar:', err.message);  // More detailed logging
+    res.status(500).json({ msg: 'Server error', error: err.message });
+  }
+});
+
+
 
 // Get all employees for a specific bar (no changes needed)
 router.get('/:barId/employees', auth, isAdmin, async (req, res) => {

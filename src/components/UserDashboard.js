@@ -1,4 +1,3 @@
-// src/components/Users/UserDashboard.js
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -18,7 +17,6 @@ import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import BottomNavBar from '../components/Users/BottomNavBar';
 
-
 const UserDashboard = () => {
   const [bars, setBars] = useState([]);
   const [filteredBars, setFilteredBars] = useState([]);
@@ -26,10 +24,15 @@ const UserDashboard = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
 
+  // Set the API URL dynamically based on the environment (local or production)
+  const API_URL = process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5001'
+    : 'https://leapbackend.onrender.com'; // Update to your hosted backend
+
   useEffect(() => {
     const fetchBars = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/api/bars/all', {
+        const response = await axios.get(`${API_URL}/api/bars/all`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -83,7 +86,6 @@ const UserDashboard = () => {
           boxShadow="md"
         />
       </Box>
-      
 
       <Flex
         flex="1"
@@ -113,7 +115,7 @@ const UserDashboard = () => {
               >
                 <Flex direction="column" align="center" justify="center" h="100%">
                   <Image
-                    src={`http://localhost:5001${bar.imageUrl}`}
+                    src={`${API_URL}${bar.imageUrl}`}
                     alt={bar.name}
                     width="100%"
                     height="150px"
