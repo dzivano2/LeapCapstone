@@ -22,6 +22,7 @@ import {
   FormControl,
   FormLabel,
 } from '@chakra-ui/react';
+import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
 import axios from 'axios';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -150,10 +151,25 @@ const AdminDashboard = () => {
     navigate(`/bar/${barId}`);
   };
 
+  const handleRemoveBar = (barId) => {
+    // Filter out the bar with the given barId
+    const updatedBars = bars.filter(bar => bar._id !== barId);
+    
+    // Update the state with the new list of bars
+    setBars(updatedBars);
+    toast({
+      title: 'Venue removed successfully.',
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+  }
+
   const handleLogout = () => {
     logout();
     navigate('/admin-login');
   };
+  
 
   return (
     <Box position="relative" minHeight="100vh" display="flex" flexDirection="column">
@@ -200,6 +216,18 @@ const AdminDashboard = () => {
                 </Text>
                 <Text fontSize="sm" color="gray.600" mt={2}>
                   <strong>Description:</strong> {bar.description}
+                  <strong>            </strong>
+                  <Button
+                    size="sm"
+                    colorScheme="red"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Stop event propagation
+                      handleRemoveBar(bar._id); // Call the remove function
+                    }}
+                    leftIcon={<DeleteIcon />}
+                  >
+                  Remove
+                  </Button>
                 </Text>
               </Box>
             </GridItem>

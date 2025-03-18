@@ -16,6 +16,7 @@ import Profile from './components/Users/Profile';
 import WaitingPage from './components/Queue/WaitingPage'
 import VenueProfile from './components/Queue/VenueProfile'
 import MapPage from './components/MapPage';
+import SuccessPage from './components/Queue/SuccessPage';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         <Route path="/bar/:barId/manage-employees" element={<ProtectedRoute element={ManageEmployees} />} /> {/* New route */}
         <Route path="/bar/:barId/manage-queue" element={<ProtectedRoute element={ManageQueue} />} /> {/* New route */}
         <Route path="/queue/waiting/:barId" element={<WaitingPage />} />
+        <Route path="/success" element={<SuccessPage />} />
         <Route path="/venue/:barId" element={<VenueProfile />} />
         <Route path="/bar/:barId/queue" element={<ProtectedRoute element={QueuePage} />} /> {/* New route */}
         <Route path="/profile" element={<ProtectedRoute element={Profile} />} /> 

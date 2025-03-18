@@ -4,6 +4,8 @@ import { Box, VStack, Image, Text, Button, Spinner, Flex, Divider, HStack } from
 import axios from 'axios';
 import { useAuth } from '../../AuthContext';
 import BottomNavBar from '../Users/BottomNavBar';
+import {loadStripe} from '@stripe/stripe-js';
+const stripePromise = await loadStripe('pk_test_51R3l8XQhyzTMJUFhq65v6Go5YSOJyA3HaILZ5XetOYSZtQHRXajIM0iWEJGUzpclKRxYZVVD950s5zeqbZVsnNeK00r6a2bbZB');
 
 const VenueProfile = () => {
   const { barId } = useParams();
@@ -76,6 +78,47 @@ const VenueProfile = () => {
     navigate(`/queue/waiting/${barId}`);
   };
 
+  
+  const handlePayments = async () => {
+    try {
+      const stripe = await stripePromise;
+  
+      // Get the current user's ID
+      const userResponse = await axios.get('http://localhost:5001/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const userId = userResponse.data._id;
+  
+      // Create a Checkout Session
+      const response = await axios.post(
+        'http://localhost:5001/api/queue/create-checkout-session',
+        {
+          items: [{ id: 1, quantity: 1 }],
+          userId, // Pass userId
+          barId,  // Pass barId
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      const session = response.data;
+  
+      // Redirect to Stripe Checkout
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.id,
+      });
+  
+      if (result.error) {
+        console.error('Stripe Checkout Error:', result.error.message);
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error.response?.data || error.message);
+    }
+  };
+
   if (loading) {
     return (
       <Flex justify="center" align="center" height="100vh">
@@ -132,6 +175,7 @@ const VenueProfile = () => {
         <VStack spacing={3} align="stretch">
           {queueStatus ? (
             queueStatus.isQueueOpen ? (
+              <>
               <Button
                 colorScheme="blue"
                 size="lg"
@@ -139,6 +183,14 @@ const VenueProfile = () => {
               >
                 {isInQueue ? 'View Queue' : 'Join Queue'}
               </Button>
+              <Button
+              colorScheme="green"
+              size="lg"
+              onClick={handlePayments}
+              >
+              Pay and Skip
+              </Button>
+              </>
             ) : (
               <Text fontSize="lg" color="red.500" fontWeight="bold">
                 Queue is not open

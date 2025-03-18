@@ -2,10 +2,11 @@ const express = require('express');
 const { auth, isAdmin } = require('../middleware/authMiddleware');
 const Queue = require('../models/Queue');
 const User = require('../models/User');
+const stripe = require("stripe")("sk_test_51R3l8XQhyzTMJUFhELOVmzsA8yh78P6p5wz1X1k680j6T6o8RQQEObfLXXN6JYpjHjWSqvpnPOHwjm8wRWeE1Rx300kE0bqIqt");
 const router = express.Router();
 const moment = require('moment-timezone');
-let io;
 
+let io;
 const initializeSocket = (server) => {
   io = require('socket.io')(server, {
     cors: {
@@ -28,6 +29,9 @@ const initializeSocket = (server) => {
   });
 };
 
+const storeItems= new Map([[
+  1,{priceInCents:50, name:'Leap the Line'}
+]])
 
 // Get queue status for a specific bar
 router.get('/status/:barId', auth, async (req, res) => {
@@ -236,6 +240,39 @@ router.post('/validateQR', auth, async (req, res) => {
     res.status(500).json({ msg: 'Server error' });
   }
 });
+
+router.post('/create-checkout-session', async (req, res) => {
+  try {
+    const { userId, barId } = req.body; // Add userId and barId to the request body
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: req.body.items.map(item => {
+        const storeItem = storeItems.get(item.id);
+        return {
+          price_data: {
+            currency: 'cad',
+            product_data: {
+              name: storeItem.name,
+            },
+            unit_amount: storeItem.priceInCents,
+          },
+          quantity: item.quantity,
+        };
+      }),
+      success_url: `http://localhost:3000/success?userId=${userId}&barId=${barId}`, // Pass userId and barId
+      cancel_url: 'http://localhost:3000/cancel',
+    });
+
+    res.json({ id: session.id });
+  } catch (e) {
+    console.error('Error creating checkout session:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+module.exports = router;
 
 
 
