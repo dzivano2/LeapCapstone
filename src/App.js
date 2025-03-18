@@ -7,14 +7,15 @@ import AdminDashboard from './components/AdminDashboard';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import UserDashboard from './components/UserDashboard';
 import BarPage from './components/Bars/BarPage';
-import ManageEmployees from './components/Employees/ManageEmployees'; // New import
-import ManageQueue from './components/Queue/ManageQueue'; // New import
-import QueuePage from './components/Queue/QueuePage'; // New import
+import ManageEmployees from './components/Employees/ManageEmployees';
+import ManageQueue from './components/Queue/ManageQueue';
+import QueuePage from './components/Queue/QueuePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './AuthContext';
 import Profile from './components/Users/Profile';
-import WaitingPage from './components/Queue/WaitingPage'
-import VenueProfile from './components/Queue/VenueProfile'
+import WaitingPage from './components/Queue/WaitingPage';
+import VenueProfile from './components/Queue/VenueProfile';
+import Chat from './components/Users/Chat';
 import MapPage from './components/MapPage';
 import SuccessPage from './components/Queue/SuccessPage';
 
@@ -29,13 +30,16 @@ function App() {
         <Route path="/employee-dashboard" element={<ProtectedRoute element={EmployeeDashboard} />} />
         <Route path="/user-dashboard" element={<ProtectedRoute element={UserDashboard} />} />
         <Route path="/bar/:barId" element={<ProtectedRoute element={BarPage} />} />
-        <Route path="/bar/:barId/manage-employees" element={<ProtectedRoute element={ManageEmployees} />} /> {/* New route */}
-        <Route path="/bar/:barId/manage-queue" element={<ProtectedRoute element={ManageQueue} />} /> {/* New route */}
+        <Route path="/bar/:barId/manage-employees" element={<ProtectedRoute element={ManageEmployees} />} />
+        <Route path="/bar/:barId/manage-queue" element={<ProtectedRoute element={ManageQueue} />} />
         <Route path="/queue/waiting/:barId" element={<WaitingPage />} />
         <Route path="/success" element={<SuccessPage />} />
         <Route path="/venue/:barId" element={<VenueProfile />} />
-        <Route path="/bar/:barId/queue" element={<ProtectedRoute element={QueuePage} />} /> {/* New route */}
-        <Route path="/profile" element={<ProtectedRoute element={Profile} />} /> 
+        <Route path="/bar/:barId/queue" element={<ProtectedRoute element={QueuePage} />} />
+        <Route path="/profile" element={<ProtectedRoute element={Profile} />} />
+        {/* Chat Route */}
+        <Route path="/chat" element={<ProtectedRoute element={Chat} />} />
+        {/* Map Route */}
         <Route path="/map" element={<MapPage />} />
       </Routes>
     </AuthProvider>
@@ -43,4 +47,3 @@ function App() {
 }
 
 export default App;
-

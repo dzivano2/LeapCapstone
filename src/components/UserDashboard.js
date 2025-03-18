@@ -83,11 +83,7 @@ const UserDashboard = () => {
           boxShadow="md"
         />
       </Box>
-      <Flex justify="center" mt={2}>
-        <Button onClick={() => navigate('/map')} colorScheme="blue">
-          View Map
-        </Button>
-      </Flex>
+      
 
       <Flex
         flex="1"

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, VStack, Image, Text, Button, Spinner, Flex, Divider, HStack } from '@chakra-ui/react';
+import { Box, VStack, Image, Text, Button, Spinner, Flex, Divider } from '@chakra-ui/react';
 import axios from 'axios';
 import { useAuth } from '../../AuthContext';
 import BottomNavBar from '../Users/BottomNavBar';
@@ -42,14 +42,15 @@ const VenueProfile = () => {
           );
           setIsInQueue(userInQueue);
         } catch (error) {
-          if (error.response?.status === 404) {
-            setQueueStatus(null); // Queue not found
+          if (error.response?.status === 403) {
+            console.log('Queue is closed or unavailable');
+            setQueueStatus(null);
           } else {
-            throw error; // Re-throw other errors
+            console.error('Error fetching queue details:', error);
           }
         }
       } catch (error) {
-        console.error('Error fetching venue or queue details:', error);
+        console.error('Error fetching venue details:', error);
       } finally {
         setLoading(false);
       }
@@ -67,9 +68,9 @@ const VenueProfile = () => {
       );
       navigate(`/queue/waiting/${barId}`);
     } catch (error) {
-      console.error('Error joining queue:', error.response || error.message);
+      console.error('Error joining queue:', error);
       if (error.response?.status === 400 && error.response?.data?.msg === 'User already in queue') {
-        navigate(`/queue/waiting/${barId}`); // Redirect to waiting page if already in queue
+        navigate(`/queue/waiting/${barId}`);
       }
     }
   };
@@ -193,7 +194,7 @@ const VenueProfile = () => {
               </>
             ) : (
               <Text fontSize="lg" color="red.500" fontWeight="bold">
-                Queue is not open
+                Queue is closed
               </Text>
             )
           ) : (

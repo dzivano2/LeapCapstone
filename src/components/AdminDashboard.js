@@ -178,9 +178,7 @@ const AdminDashboard = () => {
         <Heading as="h1" size="lg" color="white">
           Admin Dashboard
         </Heading>
-        <Button onClick={handleLogout} colorScheme="red">
-          Logout
-        </Button>
+        
       </Box>
 
       {/* Middle Section */}

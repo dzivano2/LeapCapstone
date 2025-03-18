@@ -7,15 +7,22 @@ const router = express.Router();
 const moment = require('moment-timezone');
 
 let io;
+
+const SOCKET_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5001'
+    : 'https://leapbackend.onrender.com';
+
 const initializeSocket = (server) => {
   io = require('socket.io')(server, {
     cors: {
       origin: [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://localhost:3002"
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:3002',
+        'https://leapbackend.onrender.com'
       ],
-      methods: ["GET", "POST"],
+      methods: ['GET', 'POST'],
       credentials: true
     }
   });
@@ -26,8 +33,7 @@ const initializeSocket = (server) => {
     socket.on('disconnect', () => {
       console.log(`Client disconnected: ${socket.id}`);
     });
-  });
-};
+  });}
 
 const storeItems= new Map([[
   1,{priceInCents:50, name:'Leap the Line'}
