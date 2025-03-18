@@ -9,7 +9,9 @@ import {
   Text,
   Flex,
   Checkbox,
+  IconButton,
 } from '@chakra-ui/react';
+import { ArrowBackIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 
@@ -19,14 +21,14 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false); // Checkbox state for admin
+  const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState('');
   const { signup } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Clear previous error message
+    setError('');
   
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
@@ -34,27 +36,17 @@ const Signup = () => {
     }
   
     try {
-      // Include isAdmin in the signup payload
-      const userType = isAdmin ? 'admin' : 'user'; // Check the checkbox state
-      console.log("usertype check: user is - ",userType)
+      const userType = isAdmin ? 'admin' : 'user';
 
       const payload = {
         username,
         email,
         password,
         dateOfBirth,
-        userType, // Ensure this is included in the payload
+        userType,
       };
-    
-      console.log('Signup Payload:', payload); // Debugging: Check the payload
 
-      await signup({
-        username,
-        email,
-        password,
-        dateOfBirth,
-        userType, // Pass the userType to the backend
-      });
+      await signup(payload);
       navigate('/login');
     } catch (error) {
       if (error.response && error.response.data.errors) {
@@ -64,13 +56,12 @@ const Signup = () => {
       }
     }
   };
-  
 
   return (
     <Box
       position="relative"
       bg="gray.900"
-      bgImage="url('/logomain.png')" // Background image
+      bgImage="url('/logomain.png')"
       bgSize="contain"
       bgRepeat="no-repeat"
       bgPosition="center"
@@ -81,6 +72,19 @@ const Signup = () => {
       alignItems="center"
       justifyContent="center"
     >
+      {/* ✅ Back Button */}
+      <IconButton
+        position="absolute"
+        top="16px"
+        left="16px"
+        icon={<ArrowBackIcon />}
+        colorScheme="whiteAlpha"
+        onClick={() => navigate('/')}
+        aria-label="Back"
+        zIndex="3" // ✅ Raise above overlay
+      />
+
+      {/* ✅ Background Overlay */}
       <Box
         position="absolute"
         top={0}
@@ -89,7 +93,9 @@ const Signup = () => {
         bottom={0}
         bg="gray.900"
         opacity={0.8}
+        zIndex="1"
       />
+
       <Flex
         direction="column"
         align="center"
@@ -97,7 +103,7 @@ const Signup = () => {
         w="100%"
         mx="auto"
         position="relative"
-        zIndex={1}
+        zIndex="2" // ✅ Keep content above overlay
         color="white"
       >
         <Heading as="h1" size="xl" mb={6}>
@@ -169,12 +175,7 @@ const Signup = () => {
               <Checkbox
                 colorScheme="blue"
                 isChecked={isAdmin}
-                onChange={(e) => 
-                  {
-                    console.log('Checkbox checked:', e.target.checked); // Debugging: Check the checkbox value
-                    setIsAdmin(e.target.checked)
-                  }
-                }
+                onChange={(e) => setIsAdmin(e.target.checked)}
               >
                 Sign up as Admin
               </Checkbox>

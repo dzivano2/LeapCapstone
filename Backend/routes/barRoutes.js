@@ -81,7 +81,7 @@ router.post(
     }
   }
 );
-// ... (rest of your backend code - the update, get, etc. routes) ...
+
 // Update an existing bar profile (using GeoJSON)
 router.put(
     '/:id',

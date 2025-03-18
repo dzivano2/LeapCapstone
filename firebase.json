@@ -5,7 +5,23 @@
     "rewrites": [
       {
         "source": "/api/**",
-        "destination": "https://leapbackend.onrender.com/api/**"
+        "destination": "https://leapbackend.onrender.com/api"
+      },
+      {
+        "source": "/socket.io/**",
+        "destination": "https://leapbackend.onrender.com/socket.io/"
+      }
+    ],
+    "redirects": [
+      {
+        "source": "/localhost:5001/api/**",
+        "destination": "/api/**",
+        "type": 301
+      },
+      {
+        "source": "/localhost:5001/socket.io/**",
+        "destination": "/socket.io/**",
+        "type": 301
       }
     ],
     "headers": [
@@ -18,8 +34,7 @@
           }
         ]
       }
-    ]
+    ],
+    "cleanUrls": true
   }
 }
-
-  

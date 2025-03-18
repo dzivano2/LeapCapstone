@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Button, Input, FormControl, FormLabel, Heading, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, Input, FormControl, FormLabel, Heading, Flex, Text, IconButton } from '@chakra-ui/react';
+import { ArrowBackIcon } from '@chakra-ui/icons';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,11 +13,10 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Clear previous error message
+    setError('');
     try {
       const user = await login({ username, password });
       if (user) {
-        // Redirect based on user type
         if (user.userType === 'admin') {
           navigate('/admin-dashboard');
         } else if (user.userType === 'employee') {
@@ -26,27 +26,22 @@ const Login = () => {
         }
       }
     } catch (error) {
-      console.error('Login error object:', error); // Log full error for debugging
-    
-      // Check if response and data exist
+      console.error('Login error object:', error);
       if (error.response && error.response.data) {
-        // Attempt to extract the message
         setError(error.response.data.message || 'Invalid credentials.');
       } else if (error.message) {
-        // Network or Axios-specific error
         setError(error.message);
       } else {
-        // Generic fallback
         setError('An unexpected error occurred. Please try again.');
       }
     }
-  }      
+  };
 
   return (
     <Box
       position="relative"
       bg="gray.900"
-      bgImage="url('/logomain.png')" // Background image
+      bgImage="url('/logomain.png')"
       bgSize="contain"
       bgRepeat="no-repeat"
       bgPosition="center"
@@ -57,6 +52,19 @@ const Login = () => {
       alignItems="center"
       justifyContent="center"
     >
+      {/* ✅ Back Button (zIndex ensures it's above the overlay) */}
+      <IconButton
+        position="absolute"
+        top="16px"
+        left="16px"
+        icon={<ArrowBackIcon />}
+        colorScheme="whiteAlpha"
+        onClick={() => navigate('/')}
+        aria-label="Back"
+        zIndex="3" // ✅ Raise above overlay
+      />
+
+      {/* Background Overlay */}
       <Box
         position="absolute"
         top={0}
@@ -65,7 +73,9 @@ const Login = () => {
         bottom={0}
         bg="gray.900"
         opacity={0.8}
+        zIndex="1" // ✅ Keep below content and back button
       />
+      
       <Flex
         direction="column"
         align="center"
@@ -73,7 +83,7 @@ const Login = () => {
         w="100%"
         mx="auto"
         position="relative"
-        zIndex={1}
+        zIndex="2" // ✅ Keep content above overlay
         color="white"
       >
         <Heading as="h1" size="xl" mb={6}>
@@ -126,4 +136,3 @@ const Login = () => {
 };
 
 export default Login;
-

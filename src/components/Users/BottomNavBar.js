@@ -123,6 +123,7 @@ const BottomNavBar = () => {
             <Button
               onClick={() => {
                 logout();
+                
                 onClose();
               }}
               bg="red.600"

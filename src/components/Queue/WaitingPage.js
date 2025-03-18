@@ -25,7 +25,14 @@ import { useAuth } from '../../AuthContext';
 import BottomNavBar from '../Users/BottomNavBar';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5001');
+const socket = io(
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:5001'
+    : 'https://leapbackend.onrender.com', // ✅ Direct connection to backend for WebSocket
+  { transports: ['websocket', 'polling'] }
+);
+
+
 
 const WaitingPage = () => {
   const { barId } = useParams();

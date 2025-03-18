@@ -25,7 +25,17 @@ const ManageQueue = () => {
         setIsQueueOpen(response.data.isQueueOpen);
         setQueue(response.data.queue);
       } catch (error) {
+        // ✅ Suppress "Queue doesn't exist" error (404)
+        if (error.response?.status === 404) {
+          console.warn('Queue not created yet - suppressing error');
+          setIsQueueOpen(false);
+          setQueue([]);
+          return;
+        }
+
         console.error('Error fetching queue status:', error);
+
+        // ✅ Show error only for non-404 cases
         toast({
           title: "Failed to fetch queue status.",
           status: "error",
