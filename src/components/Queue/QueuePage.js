@@ -5,7 +5,20 @@ import { io } from 'socket.io-client';
 import axios from 'axios';
 import { useAuth } from '../../AuthContext';
 
-const socket = io('http://localhost:5001');
+const SOCKET_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5001'
+    : 'https://leapbackend.onrender.com';
+
+const API_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5001'
+    : 'https://leapbackend.onrender.com';
+
+    const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] }); // ✅ Use SOCKET_URL for WebSocket
+
+    
+
 
 const QueuePage = () => {
   const { barId } = useParams();
@@ -18,7 +31,7 @@ const QueuePage = () => {
   useEffect(() => {
     const fetchQueue = async () => {
       try {
-        const response = await axios.get(`http://localhost:5001/api/queue/status/${barId}`, {
+        const response = await axios.get(`${API_URL}/api/queue/status/${barId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const { isQueueOpen, queueLength, queue } = response.data;

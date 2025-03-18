@@ -6,27 +6,55 @@ import { useAuth } from '../../AuthContext';
 import BottomNavBar from '../Users/BottomNavBar';
 
 const Chat = () => {
+  const { user, token } = useAuth(); // ✅ Move this to the top level of the component
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const { user } = useAuth();
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
 
-    // Add user message to state immediately for faster feedback
     setMessages((prev) => [...prev, { text: message, isUser: true }]);
     setMessage('');
 
     try {
-      const res = await axios.post('http://localhost:5001/api/chat', {
-        userId: user._id,
-        message: message,
-      });
+      console.log('User:', user);
+      console.log('Token:', token); // ✅ Directly accessing token
 
-      setMessages((prev) => [...prev, { text: res.data.response.kwargs.content, isUser: false }]);
+      if (!token) {
+        console.error('Authorization token missing');
+        setMessages((prev) => [...prev, { text: 'Authorization token missing.', isUser: false }]);
+        return;
+      }
+
+      console.log('Sending with token:', token);
+
+      const res = await axios.post(
+        'http://localhost:5001/api/chat',
+        {
+          userId: user._id,
+          message: message,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const aiResponse = res.data.response?.kwargs?.content || res.data.response;
+      setMessages((prev) => [...prev, { text: aiResponse, isUser: false }]);
     } catch (error) {
       console.error('Error sending message:', error);
-      setMessages((prev) => [...prev, { text: 'Error processing request.', isUser: false }]);
+
+      if (error.response) {
+        if (error.response.status === 401) {
+          setMessages((prev) => [...prev, { text: 'Unauthorized - Please log in again.', isUser: false }]);
+        } else {
+          setMessages((prev) => [...prev, { text: `Error: ${error.response.data.error}`, isUser: false }]);
+        }
+      } else {
+        setMessages((prev) => [...prev, { text: 'Error processing request.', isUser: false }]);
+      }
     }
   };
 
@@ -108,4 +136,3 @@ const Chat = () => {
 };
 
 export default Chat;
-

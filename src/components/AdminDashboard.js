@@ -21,8 +21,9 @@ import {
   useToast,
   FormControl,
   FormLabel,
+  IconButton,
 } from '@chakra-ui/react';
-import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
+import { DeleteIcon } from '@chakra-ui/icons';
 import axios from 'axios';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -36,14 +37,19 @@ const AdminDashboard = () => {
   const [image, setImage] = useState(null);
   const { token, logout } = useAuth();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedBarId, setSelectedBarId] = useState(null); // Store the selected bar ID
   const navigate = useNavigate();
   const toast = useToast();
   const googleMapsApiKey = 'AIzaSyD5Qx5qCtmL8eqgbx6ccp9ONQnEzeBRf3Q'; // Replace with your API KEY!!!
 
+  const API_URL = process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5001'
+    : 'https://leapbackend.onrender.com';
+
   useEffect(() => {
     const fetchBars = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/api/bars', {
+        const response = await axios.get(`${API_URL}/api/bars`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -68,7 +74,6 @@ const AdminDashboard = () => {
     e.preventDefault();
 
     try {
-      // 1. Geocode the address *before* creating the FormData
       const geocodeResponse = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${googleMapsApiKey}`
       );
@@ -76,7 +81,6 @@ const AdminDashboard = () => {
       if (geocodeResponse.data.status === 'OK' && geocodeResponse.data.results.length > 0) {
         const { lat, lng } = geocodeResponse.data.results[0].geometry.location;
 
-        // 2. Create FormData *after* getting the coordinates
         const formData = new FormData();
         formData.append('name', name);
         formData.append('address', address);
@@ -86,8 +90,7 @@ const AdminDashboard = () => {
         formData.append('location[coordinates][0]', lng); // Longitude first!
         formData.append('location[coordinates][1]', lat); // Latitude second
 
-        // 3. Send the request to *your* backend
-        const response = await axios.post('http://localhost:5001/api/bars', formData, {
+        const response = await axios.post(`${API_URL}/api/bars`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
@@ -103,7 +106,6 @@ const AdminDashboard = () => {
           duration: 3000,
           isClosable: true,
         });
-
       } else {
         toast({
           title: 'Geocoding Error',
@@ -115,27 +117,20 @@ const AdminDashboard = () => {
         return; // Stop if geocoding fails
       }
     } catch (error) {
-      // Handle both geocoding and backend errors
-      console.error("Error:", error); // Log the full error
+      console.error("Error:", error);
       let errorMessage = "An unexpected error occurred.";
 
       if (error.response) {
-        // Backend error (e.g., validation error)
         errorMessage = error.response.data.errors
           ? error.response.data.errors.map((e) => e.msg).join(', ')
           : "Server Error";
       } else if (error.message && error.message.includes("Geocoding error")) {
-          // Geocoding specific error
-          errorMessage = "Geocoding failed. Please check the address.";
+        errorMessage = "Geocoding failed. Please check the address.";
+      } else if (error.request) {
+        errorMessage = "No response from server";
+      } else {
+        errorMessage = error.message;
       }
-      else if (error.request)
-      {
-          errorMessage = "No response from server";
-      }
-        else {
-          errorMessage = error.message; // Other errors (e.g., network)
-      }
-
 
       toast({
         title: 'Error',
@@ -151,25 +146,33 @@ const AdminDashboard = () => {
     navigate(`/bar/${barId}`);
   };
 
-  const handleRemoveBar = (barId) => {
-    // Filter out the bar with the given barId
-    const updatedBars = bars.filter(bar => bar._id !== barId);
-    
-    // Update the state with the new list of bars
-    setBars(updatedBars);
-    toast({
-      title: 'Venue removed successfully.',
-      status: 'success',
-      duration: 3000,
-      isClosable: true,
-    });
-  }
-
-  const handleLogout = () => {
-    logout();
-    navigate('/admin-login');
+  const handleRemoveBar = async () => {
+    try {
+      await axios.delete(`${API_URL}/api/bars/${selectedBarId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setBars(bars.filter(bar => bar._id !== selectedBarId)); // Remove bar from local state
+      toast({
+        title: 'Venue removed successfully.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      onClose(); // Close the modal after deletion
+    } catch (error) {
+      toast({
+        title: 'Failed to delete venue.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
-  
+
+  const handleOpenDeleteModal = (barId) => {
+    setSelectedBarId(barId);
+    onOpen();
+  };
 
   return (
     <Box position="relative" minHeight="100vh" display="flex" flexDirection="column">
@@ -178,7 +181,6 @@ const AdminDashboard = () => {
         <Heading as="h1" size="lg" color="white">
           Admin Dashboard
         </Heading>
-        
       </Box>
 
       {/* Middle Section */}
@@ -198,7 +200,7 @@ const AdminDashboard = () => {
               onClick={() => handleViewBar(bar._id)}
             >
               <Image
-                src={`http://localhost:5001${bar.imageUrl}`}
+                src={`${API_URL}${bar.imageUrl}`}
                 alt={bar.name}
                 width="100%"
                 height="200px"
@@ -209,24 +211,26 @@ const AdminDashboard = () => {
                   {bar.name}
                 </Heading>
                 <Text fontSize="sm" color="gray.600" mt={2}>
-                  {/* FIX: Display the address, not the location object */}
                   <strong>Location:</strong> {bar.address}
                 </Text>
                 <Text fontSize="sm" color="gray.600" mt={2}>
                   <strong>Description:</strong> {bar.description}
-                  <strong>            </strong>
-                  <Button
-                    size="sm"
-                    colorScheme="red"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Stop event propagation
-                      handleRemoveBar(bar._id); // Call the remove function
-                    }}
-                    leftIcon={<DeleteIcon />}
-                  >
-                  Remove
-                  </Button>
                 </Text>
+                
+                {/* Move the Remove button down and replace with a trash icon */}
+                <Box display="flex" justifyContent="flex-end" mt={4}>
+                  <IconButton
+                    aria-label="Remove Bar"
+                    icon={<DeleteIcon />}
+                    size="sm"
+                    colorScheme="gray"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent triggering the grid item click
+                      handleOpenDeleteModal(bar._id); // Open the delete confirmation modal
+                    }}
+                  />
+                </Box>
               </Box>
             </GridItem>
           ))}
@@ -236,43 +240,21 @@ const AdminDashboard = () => {
       {/* Bottom Navigation Bar */}
       <AdminBottomNavBar onOpenAddVenue={onOpen} />
 
-      {/* Modal for Adding a New Venue */}
+      {/* Modal for Deleting a Venue */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Create a New Venue</ModalHeader>
+          <ModalHeader>Are you sure you want to delete this venue?</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <form onSubmit={handleSubmit}>
-              <FormControl mb={4} isRequired>
-                <FormLabel>Venue Name</FormLabel>
-                <Input placeholder="Venue Name" value={name} onChange={(e) => setName(e.target.value)} />
-              </FormControl>
-
-              <FormControl mb={4} isRequired>
-                <FormLabel>Address</FormLabel>
-                <Input placeholder="Venue Address" value={address} onChange={(e) => setAddress(e.target.value)} />
-              </FormControl>
-
-              {/* REMOVE Latitude and Longitude Inputs */}
-
-              <FormControl mb={4}>
-                <FormLabel>Description</FormLabel>
-                <Textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
-              </FormControl>
-
-              <FormControl mb={4} isRequired>
-                <FormLabel>Image</FormLabel>
-                <Input type="file" onChange={(e) => setImage(e.target.files[0])} />
-              </FormControl>
-              <Button type="submit" colorScheme="blue">
-                Create New Venue
-              </Button>
-            </form>
+            <Text>Once deleted, this action cannot be undone.</Text>
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" onClick={onClose}>
-              Close
+              Cancel
+            </Button>
+            <Button colorScheme="red" onClick={handleRemoveBar}>
+              Delete Venue
             </Button>
           </ModalFooter>
         </ModalContent>

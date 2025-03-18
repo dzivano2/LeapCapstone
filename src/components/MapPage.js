@@ -158,6 +158,7 @@ const MapPage = () => {
         // No need to call flyToBounds here as the MapController will handle it
     };
 
+   
     const createBarMarker = (location) => {
         const iconColor = selectedMarker === location.id ? 'green' : 'red';
         const icon = new L.DivIcon({
@@ -166,7 +167,7 @@ const MapPage = () => {
             iconSize: [15, 15],
             iconAnchor: [7, 7]
         });
-
+    
         return (
             <Marker
                 key={location.id}
@@ -178,16 +179,14 @@ const MapPage = () => {
             >
                 <Popup>
                     <div>
-                        {location.name} <br /> {location.location}
+                        {location.name || "Unnamed"} <br /> 
+                        {location.location || 'No address available'}
                         <br />
-                        <Button
-                            size="sm"
-                            colorScheme="blue"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/venue/${location.id}`);
-                            }}
-                        >
+                        {/* ✅ Direct navigation without queue fetching */}
+                        <Button size="sm" colorScheme="blue" onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/venue/${location.id}`);
+                        }}>
                             View Details
                         </Button>
                     </div>
@@ -195,6 +194,7 @@ const MapPage = () => {
             </Marker>
         );
     };
+    
 
     if (loading) {
         return (

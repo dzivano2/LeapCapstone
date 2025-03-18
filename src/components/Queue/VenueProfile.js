@@ -162,8 +162,13 @@ const VenueProfile = () => {
         {/* Venue Details */}
         <VStack spacing={2} align="stretch">
           <Text fontSize="lg" fontWeight="bold">
-            {/* FIX: Use bar.address, not bar.location */}
-            Location: <Text as="span" fontWeight="normal">{bar.address}</Text>
+            Location:{' '}
+            <Text as="span" fontWeight="normal">
+              {bar.address || 
+                (bar.location?.coordinates
+                  ? `Lat: ${bar.location.coordinates[1]}, Lng: ${bar.location.coordinates[0]}`
+                  : 'No location available')}
+            </Text>
           </Text>
           <Text fontSize="lg" fontWeight="bold">
             Description: <Text as="span" fontWeight="normal">{bar.description || 'No description provided.'}</Text>

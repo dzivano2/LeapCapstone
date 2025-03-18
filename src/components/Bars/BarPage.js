@@ -195,35 +195,28 @@ const BarPage = () => {
     <Flex direction="column" minHeight="100vh" bg="gray.50">
       {/* Header */}
       <Box
-        bg="gray.900"
-        color="white"
-        py={4}
-        px={6}
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <IconButton
-          icon={<ArrowBackIcon />}
-          onClick={() => navigate(-1)}
-          variant="ghost"
-          colorScheme="whiteAlpha"
-          aria-label="Back"
-        />
-        <Heading as="h1" size="lg" textAlign="center">
-          {bar.name}
-        </Heading>
-        <Menu>
-          <MenuButton as={Button} rightIcon={<ChevronDownIcon />} colorScheme="whiteAlpha">
-            Menu
-          </MenuButton>
-          <MenuList>
-            <MenuItem>Option 1</MenuItem>
-            <MenuItem>Option 2</MenuItem>
-            <MenuItem>Option 3</MenuItem>
-          </MenuList>
-        </Menu>
-      </Box>
+    bg="gray.900"
+    color="white"
+    py={4}
+    px={6}
+    display="flex"
+    justifyContent="space-between"
+    alignItems="center"
+  >
+    <IconButton
+      icon={<ArrowBackIcon />}
+      onClick={() => navigate(-1)}
+      variant="ghost"
+      colorScheme="whiteAlpha"
+      aria-label="Back"
+    />
+    {/* Add a Flex wrapper around Heading to center it */}
+    <Flex flex="1" justify="center">
+      <Heading as="h1" size="lg" textAlign="center">
+        {bar.name}
+      </Heading>
+    </Flex>
+  </Box>
 
       {/* Banner Image or Upload Icon */}
       <Box position="relative" width="100%" height="300px" overflow="hidden">
@@ -343,7 +336,7 @@ const BarPage = () => {
       {/* Footer */}
       <Box bg="gray.900" width="100%" py={4} mt="auto" display="flex" justifyContent="center">
         <Text color="white" fontSize="sm">
-          Footer Content
+          @LeapApp
         </Text>
       </Box>
     </Flex>
