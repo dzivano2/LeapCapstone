@@ -6,6 +6,15 @@ import { AuthProvider } from './AuthContext';
 import App from './App';
 import theme from './theme';
 
+// Override localhost calls to Render backend
+const originalFetch = global.fetch;
+global.fetch = (url, options) => {
+  if (url.startsWith('http://localhost:5001')) {
+    url = url.replace('http://localhost:5001', 'https://leapbackend.onrender.com');
+  }
+  return originalFetch(url, options);
+};
+
 const container = document.getElementById('root');
 const root = createRoot(container);
 
@@ -18,5 +27,5 @@ root.render(
         </ChakraProvider>
       </AuthProvider>
     </Router>
-  </React.StrictMode>,
+  </React.StrictMode>
 );

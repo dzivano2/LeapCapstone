@@ -29,15 +29,37 @@ if (!fs.existsSync(uploadDir)) {
 // Initialize Express app
 const app = express();
 
+// Middleware to parse JSON requests
+app.use(express.json());
+const allowedOrigins = ['https://leap-react-backup-r7qslsh8c-devens-projects-d02199ae.vercel.app', 'http://localhost:3002'];
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+  
+  // Handle preflight OPTIONS requests globally
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
 const corsOptions = {
-  origin: '*', // ✅ Open to all origins (for testing)
+  origin: ['https://leap-react-backup-r7qslsh8c-devens-projects-d02199ae.vercel.app', 'http://localhost:3002'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true, 
+  credentials: true,
+  exposedHeaders: ['Authorization'] // Add this to expose headers
 };
 
-app.use(cors(corsOptions));
 
+app.use(cors(corsOptions)); // Apply CORS middleware
 
 
 // Enable preflight OPTIONS requests
