@@ -197,6 +197,7 @@ const AdminDashboard = () => {
               borderRadius="md"
               overflow="hidden"
               cursor="pointer"
+              _hover={{ transform: 'scale(1.03)', transition: '0.2s' }}
               onClick={() => handleViewBar(bar._id)}
             >
               <Image
@@ -207,14 +208,14 @@ const AdminDashboard = () => {
                 objectFit="cover"
               />
               <Box p={4}>
-                <Heading fontSize="xl" color="gray.800">
+                <Heading fontSize="xl" color="blue.600" fontWeight="bold">
                   {bar.name}
                 </Heading>
                 <Text fontSize="sm" color="gray.600" mt={2}>
                   <strong>Location:</strong> {bar.address}
                 </Text>
-                <Text fontSize="sm" color="gray.600" mt={2}>
-                  <strong>Description:</strong> {bar.description}
+                <Text fontSize="sm" color="gray.700" mt={2} noOfLines={2}>
+                  <Text as="strong">Description:</Text> {bar.description}
                 </Text>
                 
                 {/* Move the Remove button down and replace with a trash icon */}
