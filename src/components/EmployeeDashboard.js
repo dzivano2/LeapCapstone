@@ -213,6 +213,8 @@ const EmployeeDashboard = () => {
         <Heading size="lg" color="white">
           Employee Dashboard
         </Heading>
+      <Text fontSize="lg" fontWeight="bold" color={isQueueOpen ? 'green.600' : 'red.600'}>
+        {isQueueOpen ? `Queue Open - ${queueLength} in queue` : 'Queue Closed'}</Text>
       </header>
 
       {/* Main Content */}

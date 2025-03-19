@@ -121,11 +121,18 @@ const Login = () => {
             <Button
               type="submit"
               size="lg"
-              bg="brand.500"
+              bgGradient="linear(to-r, blue.400, purple.500)"  //Beautiful gradient
               color="white"
-              _hover={{ bg: 'brand.600' }}
+              fontWeight="bold"
+              borderRadius="full"  //Smooth rounded edges
+              _hover={{ 
+              bgGradient: 'linear(to-r, blue.500, purple.600)',  
+              transform: 'scale(1.05)'  //Slightly enlarges on hover
+              }}
+              _active={{ transform: 'scale(0.98)' }}  //Subtle press effect
               w="full"
-            >
+              transition="all 0.3s ease"  //Smooth animation
+              > 
               Login
             </Button>
           </form>
