@@ -251,10 +251,10 @@ const AdminDashboard = () => {
             <Text>Once deleted, this action cannot be undone.</Text>
           </ModalBody>
           <ModalFooter>
-            <Button variant="ghost" onClick={onClose}>
+            <Button variant="outline" colorScheme="gray" onClick={onClose} _hover={{ bg: "gray.200" }}>
               Cancel
             </Button>
-            <Button colorScheme="red" onClick={handleRemoveBar}>
+            <Button colorScheme="red" fontWeight="bold" _hover={{ bg: "red.600" }} onClick={handleRemoveBar}>
               Delete Venue
             </Button>
           </ModalFooter>
