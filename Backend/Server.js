@@ -1,3 +1,6 @@
+require('dotenv').config({ path: './.env' }); // Specify the path explicitly
+
+
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./DB');
@@ -6,13 +9,14 @@ const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
+
 const path = require('path');
 const barRoutes = require('./routes/barRoutes'); // Import the bar routes
 const employeeRoutes = require('./routes/employeeRoutes'); // Import the employee routes
 const userRoutes = require('./routes/userRoutes'); // Import user routes
 const { router: queueRoutes, initializeSocket } = require('./routes/queueRoutes'); // Import queue routes and socket initializer
 const { auth, isAdmin } = require('./middleware/authMiddleware'); // Import auth and isAdmin middleware
-
+const chatRoutes = require('./routes/chat');
 // Create uploads directory if it doesn't exist
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -20,20 +24,34 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // Hardcoded JWT secret key
-const JWT_SECRET = 'your_jwt_secret';
+
 
 // Initialize Express app
 const app = express();
 
 // Middleware to parse JSON requests
 app.use(express.json());
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:3001'], 
-  credentials: true
-}));
- // CORS Middleware
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve static files
 
+const corsOptions = {
+  origin: ['http://localhost:3000','http://localhost:3001','http://localhost:3002'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  exposedHeaders: ['Authorization'] // Add this to expose headers
+};
+
+
+app.use(cors(corsOptions)); // Apply CORS middleware
+
+
+// Enable preflight OPTIONS requests
+app.options('*', cors(corsOptions));
+
+// ✅ Serve static files with open CORS for /uploads
+app.use('/uploads', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); // ✅ Open for static files
+  next();
+}, express.static(path.join(__dirname, 'uploads')));
 // Connect to MongoDB
 connectDB();
 
@@ -132,6 +150,9 @@ app.get('/me', auth, async (req, res) => {
 
 // Bar routes
 app.use('/api/bars', barRoutes);
+
+//ChatGPT routes
+app.use('/api', chatRoutes);
 
 // Employee routes
 app.use('/api/employees', employeeRoutes);

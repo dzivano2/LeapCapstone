@@ -5,10 +5,7 @@ const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-const API_URL =
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:5001'
-    : 'https://leapbackend.onrender.com';
+const API_URL = process.env.REACT_APP_API_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
