@@ -22,6 +22,7 @@ const UserSchema = new Schema({
     enum: ['user', 'admin', 'employee'],
     required: true,
   },
+  paid: { type: Boolean, default: false },
   tokens: [
     {
       token: {
