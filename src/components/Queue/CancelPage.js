@@ -50,7 +50,7 @@ const Cancel = () => {
             size="lg"
             width="100%"
             mt={6}
-            onClick={() => (window.location.href = '/')}
+            onClick={() => (window.location.href = '/user')}
           >
             Back to Home
           </Button>

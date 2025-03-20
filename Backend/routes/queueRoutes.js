@@ -13,27 +13,40 @@ const SOCKET_URL =
     ? 'http://localhost:5001'
     : 'https://leapbackend.onrender.com';
 
-const initializeSocket = (server) => {
-  io = require('socket.io')(server, {
-    cors: {
-      origin: [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'http://localhost:3002',
-        'https://leapbackend.onrender.com'
-      ],
-      methods: ['GET', 'POST'],
-      credentials: true
-    }
-  });
-
-  io.on('connection', (socket) => {
-    console.log(`Client connected: ${socket.id}`);
-
-    socket.on('disconnect', () => {
-      console.log(`Client disconnected: ${socket.id}`);
-    });
-  });}
+    const initializeSocket = (server) => {
+      io = require('socket.io')(server, {
+        cors: {
+          origin: [
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'http://localhost:3002',
+            'https://leapbackend.onrender.com'
+          ],
+          methods: ['GET', 'POST'],
+          credentials: true
+        }
+      });
+    
+      io.on('connection', (socket) => {
+        console.log(`Client connected: ${socket.id}`);
+    
+        // ✅ Let user join their own room using userId
+        socket.on('join-room', (userId) => {
+          socket.join(userId);
+          console.log(`User ${userId} joined room`);
+        });
+    
+        socket.on('leave-room', (userId) => {
+          socket.leave(userId);
+          console.log(`User ${userId} left room`);
+        });
+    
+        socket.on('disconnect', () => {
+          console.log(`Client disconnected: ${socket.id}`);
+        });
+      });
+    };
+    
 
 const storeItems= new Map([[
   1,{priceInCents:50, name:'Leap the Line'}
@@ -69,6 +82,7 @@ router.get('/status/:barId', auth, async (req, res) => {
   }
 });
 // Remove a user from the queue (Employee only)
+// Remove a user from the queue (Employee only)
 router.delete('/:barId/remove-user/:userId', auth, async (req, res) => {
   try {
     const queue = await Queue.findOne({ barId: req.params.barId });
@@ -88,7 +102,9 @@ router.delete('/:barId/remove-user/:userId', auth, async (req, res) => {
 
     await queue.save();
 
-    // Emit real-time update to connected clients
+    // ✅ Emit a targeted event to the specific user
+    io.to(req.params.userId).emit('user-kicked', { barId: req.params.barId });
+
     io.emit('queue-updated', {
       barId: req.params.barId,
       queue: queue.users,
@@ -233,29 +249,43 @@ router.post('/validateQR', auth, async (req, res) => {
       return res.status(400).json({ msg: 'User is not first in line or invalid QR code' });
     }
 
-    // Remove the first user from the queue
+    // ✅ Remove the user
     queue.users.shift();
     await queue.save();
 
-    res.json({ msg: 'User validated, removed from queue, and cannot rejoin until 2 AM.' });
+    // ✅ Emit targeted event to redirect user after removal
+    io.to(userId).emit('user-kicked', { barId });
 
-    // Emit real-time queue update
     io.emit('queue-updated', { barId, queue: queue.users, queueLength: queue.users.length });
+
+    res.json({ msg: 'User validated and removed from queue' });
   } catch (error) {
     console.error('Error in validateQR:', error.message);
     res.status(500).json({ msg: 'Server error' });
   }
 });
 
+
 router.post('/create-checkout-session', async (req, res) => {
   try {
-    const { userId, barId } = req.body; // Add userId and barId to the request body
+    const { userId, barId } = req.body;
+    if (!userId || !barId) {
+      return res.status(400).json({ msg: 'Missing userId or barId' });
+    }
+
+    // ✅ Use environment variables to handle production vs dev URLs
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? process.env.FRONTEND_URL // Example: https://yourapp.com
+        : 'http://localhost:3002';
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
       line_items: req.body.items.map(item => {
         const storeItem = storeItems.get(item.id);
+        if (!storeItem) throw new Error(`Invalid item ID: ${item.id}`);
+
         return {
           price_data: {
             currency: 'cad',
@@ -267,8 +297,9 @@ router.post('/create-checkout-session', async (req, res) => {
           quantity: item.quantity,
         };
       }),
-      success_url: `http://localhost:3000/success?userId=${userId}&barId=${barId}`, // Pass userId and barId
-      cancel_url: 'http://localhost:3000/cancel',
+      // ✅ Use dynamic URLs
+      success_url: `${baseUrl}/success?userId=${userId}&barId=${barId}`,
+      cancel_url: `${baseUrl}/cancel`,
     });
 
     res.json({ id: session.id });
@@ -277,6 +308,7 @@ router.post('/create-checkout-session', async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 
 module.exports = router;
 

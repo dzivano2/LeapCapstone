@@ -41,6 +41,9 @@ router.post(
       .isArray({ min: 2, max: 2 })
       .withMessage('Coordinates must be an array of [longitude, latitude]'),
     body('location.type').equals('Point').withMessage('Location type must be Point'),
+    body('locationType')
+      .isIn(['Bar', 'Restaurant', 'Sports','Concert','Clinic','Event','Other'])
+      .withMessage('Location type must be Indoor, Outdoor, or Mixed') // ✅ New validation for location type
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -48,15 +51,14 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, address, description } = req.body;
-     // Check if req.file exists before accessing its properties
+    const { name, address, description, locationType } = req.body; // ✅ Include locationType
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : '';
 
-
     try {
-        if (!req.body.location || !req.body.location.coordinates) {
-            return res.status(400).json({ errors: [{ msg: 'Location coordinates are required' }] });
-          }
+      if (!req.body.location || !req.body.location.coordinates) {
+        return res.status(400).json({ errors: [{ msg: 'Location coordinates are required' }] });
+      }
+
       const { coordinates } = req.body.location;
       // Ensure coordinates are numbers
       const parsedCoordinates = coordinates.map(Number);
@@ -65,11 +67,12 @@ router.post(
         name,
         location: {
           type: 'Point',
-          coordinates: parsedCoordinates, // Use the parsed coordinates
+          coordinates: parsedCoordinates,
         },
         address, // Store the full address
         description,
         imageUrl,
+        locationType, // ✅ Add locationType to the schema
         createdBy: req.user._id,
       });
 
@@ -81,6 +84,7 @@ router.post(
     }
   }
 );
+
 
 // Update an existing bar profile (using GeoJSON)
 router.put(

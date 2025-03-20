@@ -44,6 +44,11 @@ const WaitingPage = () => {
   const [loading, setLoading] = useState(true);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchQueueStatus = async () => {
@@ -65,17 +70,33 @@ const WaitingPage = () => {
   }, [barId, token]);
 
   useEffect(() => {
-    socket.on('queue-updated', (data) => {
-      if (data.barId === barId) {
-        setQueue(data.queue);
-        setQueueLength(data.queueLength);
-      }
-    });
-
-    return () => {
-      socket.off('queue-updated');
-    };
-  }, [barId]);
+    if (user?._id) {
+      // ✅ Join the user's socket room using userId
+      socket.emit('join-room', user._id);
+  
+      // ✅ Listen for queue updates
+      socket.on('queue-updated', (data) => {
+        if (data.barId === barId) {
+          setQueue(data.queue);
+          setQueueLength(data.queueLength);
+        }
+      });
+  
+      // ✅ Handle user being kicked from the queue
+      socket.on('user-kicked', () => {
+        console.log('User kicked from queue');
+        navigate('/user-dashboard'); // Redirect user after removal
+      });
+  
+      // ✅ Clean up socket connection on unmount
+      return () => {
+        socket.emit('leave-room', user._id);
+        socket.off('queue-updated');
+        socket.off('user-kicked');
+      };
+    }
+  }, [user, barId, navigate]);
+  
 
   const handleLeaveQueue = async () => {
     try {
@@ -169,7 +190,9 @@ const WaitingPage = () => {
           <ModalCloseButton />
           <ModalBody>
             <Flex justify="center" mt={4}>
-              <QRCodeCanvas value={JSON.stringify({ userId: user._id, barId })} size={200} />
+            <QRCodeCanvas value={JSON.stringify({ userId: user?._id || 'unknown', barId })} size={200} />
+
+
             </Flex>
             <Text fontSize="sm" color="gray.600" mt={4} textAlign="center">
               Show this QR code to the employee to validate your spot.

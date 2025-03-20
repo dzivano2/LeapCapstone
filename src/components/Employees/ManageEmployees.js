@@ -131,7 +131,7 @@ const ManageEmployees = () => {
     {employee.profilePicture && (
       <Image
         src={`http://localhost:5001${employee.profilePicture}`}
-        alt={employee.fullName}
+        alt={employee.username}
         boxSize="100px"
         objectFit="cover"
         marginRight={4}
@@ -139,10 +139,11 @@ const ManageEmployees = () => {
     )}
     <Box flex="1">
       <Heading fontSize="xl">{employee.fullName}</Heading>
-      <Text mt={2}><strong>Email:</strong> {employee.email}</Text>
+      <Text mt={2}><strong>Username:</strong> {employee.username}</Text>
+      
       <Text mt={2}><strong>Employee ID:</strong> {employee.employeeId}</Text>
       {expandedEmployee === employee._id && (
-        <Text mt={2}><strong>Date of Birth:</strong> {new Date(employee.dateOfBirth).toLocaleDateString()}</Text>
+       <Text mt={2}><strong>Email:</strong> {employee.email}</Text>
       )}
     </Box>
     <IconButton
@@ -180,7 +181,7 @@ const ManageEmployees = () => {
             <form onSubmit={handleSubmit} style={{ width: '100%' }}>
               <Box mb={4}>
                 <Input
-                  placeholder="Full Name"
+                  placeholder="Username"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required

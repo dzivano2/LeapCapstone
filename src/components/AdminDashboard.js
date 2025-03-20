@@ -31,12 +31,16 @@ import AdminBottomNavBar from './Admin/AdminBottomNavBar';
 
 const AdminDashboard = () => {
   const [bars, setBars] = useState([]);
+  const [locationType, setLocationType] = useState('');
+
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState(null);
   const { token, logout } = useAuth();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isAddVenueOpen, onOpen: onOpenAddVenue, onClose: onCloseAddVenue } = useDisclosure();
+  const { isOpen: isDeleteModalOpen, onOpen: onOpenDeleteModal, onClose: onCloseDeleteModal } = useDisclosure();
+
   const [selectedBarId, setSelectedBarId] = useState(null); // Store the selected bar ID
   const navigate = useNavigate();
   const toast = useToast();
@@ -72,34 +76,37 @@ const AdminDashboard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const geocodeResponse = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${googleMapsApiKey}`
       );
-
+  
       if (geocodeResponse.data.status === 'OK' && geocodeResponse.data.results.length > 0) {
         const { lat, lng } = geocodeResponse.data.results[0].geometry.location;
-
+  
         const formData = new FormData();
         formData.append('name', name);
         formData.append('address', address);
         formData.append('description', description);
+        formData.append('locationType', locationType);
+
         formData.append('image', image);
         formData.append('location[type]', 'Point');
-        formData.append('location[coordinates][0]', lng); // Longitude first!
-        formData.append('location[coordinates][1]', lat); // Latitude second
-
+        formData.append('location[coordinates][0]', lng);
+        formData.append('location[coordinates][1]', lat);
+  
         const response = await axios.post(`${API_URL}/api/bars`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
           },
         });
-
+  
         setBars([...bars, response.data]);
         resetForm();
-        onClose();
+  
+        onCloseAddVenue(); // ✅ Fix: Use the correct closing function
         toast({
           title: 'Venue created successfully.',
           status: 'success',
@@ -114,12 +121,12 @@ const AdminDashboard = () => {
           duration: 5000,
           isClosable: true,
         });
-        return; // Stop if geocoding fails
+        return;
       }
     } catch (error) {
       console.error("Error:", error);
       let errorMessage = "An unexpected error occurred.";
-
+  
       if (error.response) {
         errorMessage = error.response.data.errors
           ? error.response.data.errors.map((e) => e.msg).join(', ')
@@ -131,7 +138,7 @@ const AdminDashboard = () => {
       } else {
         errorMessage = error.message;
       }
-
+  
       toast({
         title: 'Error',
         description: errorMessage,
@@ -141,11 +148,17 @@ const AdminDashboard = () => {
       });
     }
   };
+  
 
   const handleViewBar = (barId) => {
     navigate(`/bar/${barId}`);
   };
 
+  const handleOpenDeleteModal = (barId) => {
+    setSelectedBarId(barId);
+    onOpenDeleteModal(); // ✅ Use correct delete handler
+  };
+  
   const handleRemoveBar = async () => {
     try {
       await axios.delete(`${API_URL}/api/bars/${selectedBarId}`, {
@@ -158,7 +171,7 @@ const AdminDashboard = () => {
         duration: 3000,
         isClosable: true,
       });
-      onClose(); // Close the modal after deletion
+      onCloseDeleteModal(); // ✅ Use correct delete handler
     } catch (error) {
       toast({
         title: 'Failed to delete venue.',
@@ -168,11 +181,7 @@ const AdminDashboard = () => {
       });
     }
   };
-
-  const handleOpenDeleteModal = (barId) => {
-    setSelectedBarId(barId);
-    onOpen();
-  };
+  
 
   return (
     <Box position="relative" minHeight="100vh" display="flex" flexDirection="column">
@@ -214,8 +223,12 @@ const AdminDashboard = () => {
                   <strong>Location:</strong> {bar.address}
                 </Text>
                 <Text fontSize="sm" color="gray.600" mt={2}>
+                  <strong>Type:</strong> {bar.locationType}
+                </Text>
+                <Text fontSize="sm" color="gray.600" mt={2}>
                   <strong>Description:</strong> {bar.description}
                 </Text>
+                
                 
                 {/* Move the Remove button down and replace with a trash icon */}
                 <Box display="flex" justifyContent="flex-end" mt={4}>
@@ -238,27 +251,92 @@ const AdminDashboard = () => {
       </Flex>
 
       {/* Bottom Navigation Bar */}
-      <AdminBottomNavBar onOpenAddVenue={onOpen} />
+<AdminBottomNavBar onOpenAddVenue={onOpenAddVenue} />
 
-      {/* Modal for Deleting a Venue */}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Are you sure you want to delete this venue?</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Text>Once deleted, this action cannot be undone.</Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button colorScheme="red" onClick={handleRemoveBar}>
-              Delete Venue
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+{/* Modal for Adding a New Venue */}
+<Modal isOpen={isAddVenueOpen} onClose={onCloseAddVenue}>
+  <ModalOverlay />
+  <ModalContent>
+    <ModalHeader>Create a New Venue</ModalHeader>
+    <ModalCloseButton />
+    <ModalBody>
+      <form onSubmit={handleSubmit}>
+        <FormControl mb={4} isRequired>
+          <FormLabel>Venue Name</FormLabel>
+          <Input placeholder="Venue Name" value={name} onChange={(e) => setName(e.target.value)} />
+        </FormControl>
+
+        <FormControl mb={4} isRequired>
+          <FormLabel>Address</FormLabel>
+          <Input placeholder="Venue Address" value={address} onChange={(e) => setAddress(e.target.value)} />
+        </FormControl>
+
+        <FormControl mb={4}>
+          <FormLabel>Description</FormLabel>
+          <Textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+        </FormControl>
+        <FormControl mb={4} isRequired>
+  <FormLabel>Location Type</FormLabel>
+  <select
+    value={locationType}
+    onChange={(e) => setLocationType(e.target.value)}
+    style={{
+      width: '100%',
+      padding: '8px',
+      backgroundColor: '#2D3748',
+      color: 'white',
+      borderRadius: '4px',
+      border: '1px solid #4A5568'
+    }}
+  >
+    <option value="" disabled>Select Location Type</option>
+    {['Bar', 'Restaurant', 'Sports', 'Concert', 'Clinic', 'Event', 'Other'].map((type) => (
+      <option key={type} value={type}>
+        {type}
+      </option>
+    ))}
+  </select>
+</FormControl>
+
+
+        <FormControl mb={4} isRequired>
+          <FormLabel>Image</FormLabel>
+          <Input type="file" onChange={(e) => setImage(e.target.files[0])} />
+        </FormControl>
+
+        <Button type="submit" colorScheme="blue">
+          Create New Venue
+        </Button>
+      </form>
+    </ModalBody>
+    <ModalFooter>
+      <Button variant="ghost" onClick={onCloseAddVenue}>
+        Close
+      </Button>
+    </ModalFooter>
+  </ModalContent>
+</Modal>
+{/* Modal for Deleting a Venue */}
+<Modal isOpen={isDeleteModalOpen} onClose={onCloseDeleteModal}>
+  <ModalOverlay />
+  <ModalContent>
+    <ModalHeader>Are you sure you want to delete this venue?</ModalHeader>
+    <ModalCloseButton />
+    <ModalBody>
+      <Text>Once deleted, this action cannot be undone.</Text>
+    </ModalBody>
+    <ModalFooter>
+      <Button variant="ghost" onClick={onCloseDeleteModal}>
+        Cancel
+      </Button>
+      <Button colorScheme="red" onClick={handleRemoveBar}>
+        Delete Venue
+      </Button>
+    </ModalFooter>
+  </ModalContent>
+</Modal>
+
+
     </Box>
   );
 };

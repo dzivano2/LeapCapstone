@@ -129,6 +129,9 @@ const UserDashboard = () => {
                     <Text fontSize="sm" color="gray.600" mt={1}>
                       {bar.address}
                     </Text>
+                    <Text fontSize="sm" color="gray.600" mt={1}>
+                      {bar.locationType}
+                    </Text>
                   </Box>
                 </Flex>
               </GridItem>

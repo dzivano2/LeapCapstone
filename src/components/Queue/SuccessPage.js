@@ -68,7 +68,7 @@ const SuccessPage = () => {
             size="lg"
             width="100%"
             mt={6}
-            onClick={() => (window.location.href = '/')}
+            onClick={() => (window.location.href = '/user-dashboard')}
           >
             Back to Home
           </Button>
