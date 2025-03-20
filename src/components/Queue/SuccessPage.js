@@ -1,7 +1,8 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React, {useEffect} from 'react';
+import { useLocation} from 'react-router-dom';
 import { Box, Text, Flex, VStack, Heading, Button, useColorModeValue } from '@chakra-ui/react';
 import {QRCodeCanvas} from 'qrcode.react';
+import axios from 'axios';
 
 const SuccessPage = () => {
   const location = useLocation();
@@ -16,6 +17,19 @@ const SuccessPage = () => {
   const cardBgColor = useColorModeValue('white', 'gray.700');
   const textColor = useColorModeValue('gray.600', 'gray.200');
   const headingColor = useColorModeValue('gray.800', 'white');
+
+  useEffect(() => {
+    if (userId && barId) {
+      // Call the backend to update the user's `paid` field and add them to the queue
+      axios.post('http://localhost:5001/api/queue/handle-payment-success', { userId, barId })
+        .then(response => {
+          console.log('Payment success handled:', response.data);
+        })
+        .catch(error => {
+          console.error('Error handling payment success:', error);
+        });
+    }
+  }, [userId, barId]);
 
   return (
     <Box

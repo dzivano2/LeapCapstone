@@ -213,6 +213,7 @@ const EmployeeDashboard = () => {
         <Heading size="lg" color="white">
           Employee Dashboard
         </Heading>
+      
       </header>
 
       {/* Main Content */}

@@ -119,15 +119,16 @@ const Login = () => {
               />
             </FormControl>
             <Button
-              type="submit"
-              size="lg"
-              bg="brand.500"
-              color="white"
-              _hover={{ bg: 'brand.600' }}
-              w="full"
-            >
-              Login
-            </Button>
+  type="submit"
+  size="lg"
+  bg="brand.500" // ✅ Same green as Sign Up button
+  color="white"
+  _hover={{ bg: 'brand.600' }} // ✅ Darker green on hover
+  w="full"
+>
+  Login
+</Button>
+
           </form>
         </Box>
       </Flex>

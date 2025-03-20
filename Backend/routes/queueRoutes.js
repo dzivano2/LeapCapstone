@@ -245,23 +245,47 @@ router.post('/validateQR', auth, async (req, res) => {
       return res.status(400).json({ msg: 'Queue not found for this barId' });
     }
 
-    if (queue.users.length === 0 || queue.users[0].userId.toString() !== userId) {
-      return res.status(400).json({ msg: 'User is not first in line or invalid QR code' });
+    // Find the user in the queue
+    const userInQueue = queue.users.find(user => user.userId.toString() === userId);
+
+    // Fetch the user's profile to check if they have paid
+    const userProfile = await User.findById(userId);
+    if (!userProfile) {
+      return res.status(400).json({ msg: 'User profile not found' });
     }
 
-    // ✅ Remove the user
-    queue.users.shift();
-    await queue.save();
+    const hasPaidToSkip = userProfile.paid; // Check the `paid` field from the user's profile
 
-    // ✅ Emit targeted event to redirect user after removal
+    // If the user is not in the queue and hasn't paid, return an error
+    if (!userInQueue && !hasPaidToSkip) {
+      return res.status(400).json({ msg: 'User not found in the queue and has not paid to skip the line' });
+    }
+
+    let message = 'User validated';
+
+    // ✅ If the user is in the queue, check if they are first in line
+    if (userInQueue) {
+      const isFirstInLine = queue.users[0].userId.toString() === userId;
+
+      if (isFirstInLine) {
+        queue.users.shift(); // ✅ Remove the first user
+        await queue.save();
+        message += ', removed from queue, and cannot rejoin until 2 AM.';
+      }
+    } else if (hasPaidToSkip) {
+      message += ' (paid user).';
+    }
+
+    // ✅ Emit socket events AFTER response is sent
     io.to(userId).emit('user-kicked', { barId });
-
     io.emit('queue-updated', { barId, queue: queue.users, queueLength: queue.users.length });
 
-    res.json({ msg: 'User validated and removed from queue' });
+    // ✅ Send ONE response only
+    return res.json({ msg: message });
+
   } catch (error) {
     console.error('Error in validateQR:', error.message);
-    res.status(500).json({ msg: 'Server error' });
+    return res.status(500).json({ msg: 'Server error' });
   }
 });
 
@@ -306,6 +330,28 @@ router.post('/create-checkout-session', async (req, res) => {
   } catch (e) {
     console.error('Error creating checkout session:', e.message);
     res.status(500).json({ error: e.message });
+  }
+});
+
+
+
+router.post('/handle-payment-success', async (req, res) => {
+  try {
+    const { userId, barId } = req.body;
+
+    // Fetch the user's profile
+    const userProfile = await User.findById(userId);
+    if (!userProfile) {
+      return res.status(400).json({ msg: 'User profile not found' });
+    }
+
+    // Set the `paid` field to true
+    userProfile.paid = true;
+    console.log(userProfile);
+    await userProfile.save();
+  } catch (error) {
+    console.error('Error in handle-payment-success:', error.message);
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 

@@ -206,6 +206,7 @@ const AdminDashboard = () => {
               borderRadius="md"
               overflow="hidden"
               cursor="pointer"
+              _hover={{ transform: 'scale(1.03)', transition: '0.2s' }}
               onClick={() => handleViewBar(bar._id)}
             >
               <Image
@@ -216,7 +217,7 @@ const AdminDashboard = () => {
                 objectFit="cover"
               />
               <Box p={4}>
-                <Heading fontSize="xl" color="gray.800">
+                <Heading fontSize="xl" color="blue.600" fontWeight="bold">
                   {bar.name}
                 </Heading>
                 <Text fontSize="sm" color="gray.600" mt={2}>

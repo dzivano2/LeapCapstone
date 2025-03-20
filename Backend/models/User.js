@@ -22,6 +22,7 @@ const UserSchema = new Schema({
     enum: ['user', 'admin', 'employee'],
     required: true,
   },
+  paid: { type: Boolean, default: false },
   tokens: [
     {
       token: {
@@ -50,7 +51,7 @@ const UserSchema = new Schema({
 
 UserSchema.methods.generateAuthToken = async function() {
   const user = this;
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '12h' });
   user.tokens = user.tokens.concat({ token });
   await user.save();
   return token;
